@@ -1,0 +1,21 @@
+FROM ubuntu:22.10
+
+RUN printf "deb http://old-releases.ubuntu.com/ubuntu/ kinetic main universe multiverse restricted\n\
+deb http://old-releases.ubuntu.com/ubuntu/ kinetic-updates main universe multiverse restricted\n\
+" > /etc/apt/sources.list
+
+RUN apt-get update && \
+    apt-get install -y openssh-client openssh-server iputils-ping && \
+    apt-get clean
+
+RUN useradd -m -s /bin/bash prueba && \
+    echo "prueba:prueba" | chpasswd
+
+RUN mkdir -p /var/run/sshd
+
+RUN sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
